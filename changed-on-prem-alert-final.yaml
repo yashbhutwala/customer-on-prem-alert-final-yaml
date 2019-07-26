@@ -167,6 +167,7 @@ spec:
       protocol: TCP
       targetPort: 8888
   selector:
+    customerlabel: customerselector
     app: alert
     component: cfssl
     name: demo
