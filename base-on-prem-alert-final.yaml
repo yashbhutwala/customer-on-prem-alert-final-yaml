@@ -4,7 +4,7 @@ metadata:
   creationTimestamp: null
   labels:
     app: alert
-    component: alert
+    component: alert-rc
     name: demo
   name: demo-alert-alert
   namespace: default
@@ -66,7 +66,7 @@ metadata:
   creationTimestamp: null
   labels:
     app: alert
-    component: cfssl
+    component: cfssl-rc
     name: demo
   name: demo-alert-cfssl
   namespace: default
@@ -125,7 +125,7 @@ metadata:
   creationTimestamp: null
   labels:
     app: alert
-    component: alert
+    component: alert-svc
     name: demo
   name: demo-alert-alert
   namespace: default
@@ -150,7 +150,7 @@ metadata:
   creationTimestamp: null
   labels:
     app: alert
-    component: cfssl
+    component: cfssl-svc
     name: demo
   name: demo-alert-cfssl
   namespace: default
@@ -179,7 +179,7 @@ metadata:
   creationTimestamp: null
   labels:
     app: alert
-    component: alert
+    component: alert-configmap
     name: demo
   name: demo-alert-blackduck-config
   namespace: default
@@ -194,7 +194,7 @@ metadata:
   creationTimestamp: null
   labels:
     app: alert
-    component: alert
+    component: alert-secret
     name: demo
   name: demo-alert-secret
   namespace: default
