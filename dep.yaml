@@ -1,0 +1,41 @@
+runtimeobjectsgroupings:
+  BlackDuckComponents:
+    - ReplicationController.default.blackduck-sample-blackduck-cfssl
+    - ReplicationController.default.blackduck-sample-blackduck-webserver
+    - ReplicationController.default.blackduck-sample-blackduck-documentation
+    - ReplicationController.default.blackduck-sample-blackduck-registration
+    - ReplicationController.default.blackduck-sample-blackduck-zookeeper
+    - ReplicationController.default.blackduck-sample-blackduck-jobrunner
+    - ReplicationController.default.blackduck-sample-blackduck-scan
+    - ReplicationController.default.blackduck-sample-blackduck-authentication
+    - ReplicationController.default.blackduck-sample-blackduck-webapp-logstash
+    - ReplicationController.default.blackduck-sample-blackduck-uploadcache
+    - Service.default.blackduck-sample-blackduck-cfssl
+    - Service.default.blackduck-sample-blackduck-webserver
+    - Service.default.blackduck-sample-blackduck-documentation
+    - Service.default.blackduck-sample-blackduck-registration
+    - Service.default.blackduck-sample-blackduck-zookeeper
+    - Service.default.blackduck-sample-blackduck-scan
+    - Service.default.authentication
+    - Service.default.webapp
+    - Service.default.blackduck-sample-blackduck-logstash
+    - Service.default.uploadcache
+    - ConfigMap.default.blackduck-sample-blackduck-config
+    - Secret.default.blackduck-sample-blackduck-webserver-certificate
+    - Secret.default.blackduck-sample-blackduck-upload-cache
+  PersistentVolumeClaims:
+    - PersistentVolumeClaim.default.blackduck-sample-blackduck-registration
+    - PersistentVolumeClaim.default.blackduck-sample-blackduck-webapp
+    - PersistentVolumeClaim.default.blackduck-sample-blackduck-zookeeper
+    - PersistentVolumeClaim.default.blackduck-sample-blackduck-postgres
+    - PersistentVolumeClaim.default.blackduck-sample-blackduck-cfssl
+    - PersistentVolumeClaim.default.blackduck-sample-blackduck-solr
+    - PersistentVolumeClaim.default.blackduck-sample-blackduck-logstash
+    - PersistentVolumeClaim.default.blackduck-sample-blackduck-uploadcache-data
+    - PersistentVolumeClaim.default.blackduck-sample-blackduck-authentication
+  Postgres:
+    - ReplicationController.default.blackduck-sample-blackduck-postgres
+    - Service.default.blackduck-sample-blackduck-postgres
+    - ConfigMap.default.blackduck-sample-blackduck-db-config
+    - Secret.default.blackduck-sample-blackduck-db-creds
+runtimeobjectdependencies: []

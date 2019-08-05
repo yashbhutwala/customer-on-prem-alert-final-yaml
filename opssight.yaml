@@ -1,0 +1,557 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  creationTimestamp: null
+  labels:
+    app: opssight
+    component: core
+    name: opssight-sample
+  name: opssight-sample-opssight-core
+  namespace: opssight-sample
+spec:
+  replicas: 1
+  selector:
+    app: opssight
+    component: core
+    name: opssight-sample
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: opssight
+        component: core
+        name: opssight-sample
+      name: opssight-sample-opssight-core
+    spec:
+      containers:
+        - args:
+            - /etc/core/opssight.json
+          command:
+            - ./opssight-core
+          envFrom:
+            - secretRef:
+                name: opssight-sample-opssight-blackduck
+          image: docker.io/blackducksoftware/opssight-core:2.2.4
+          name: core
+          ports:
+            - containerPort: 3001
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 300m
+              memory: 1300Mi
+          volumeMounts:
+            - mountPath: /etc/core
+              name: core
+      dnsPolicy: ClusterFirst
+      volumes:
+        - configMap:
+            defaultMode: 420
+            name: opssight-sample-opssight-opssight
+          name: core
+status:
+  replicas: 0
+
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  creationTimestamp: null
+  labels:
+    app: opssight
+    component: scanner
+    name: opssight-sample
+  name: opssight-sample-opssight-scanner
+  namespace: opssight-sample
+spec:
+  replicas: 1
+  selector:
+    app: opssight
+    component: scanner
+    name: opssight-sample
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: opssight
+        component: scanner
+        name: opssight-sample
+      name: opssight-sample-opssight-scanner
+    spec:
+      containers:
+        - args:
+            - /etc/scanner/opssight.json
+          command:
+            - ./opssight-scanner
+          envFrom:
+            - secretRef:
+                name: opssight-sample-opssight-blackduck
+          image: docker.io/blackducksoftware/opssight-scanner:2.2.4
+          name: scanner
+          ports:
+            - containerPort: 3003
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 300m
+              memory: 1300Mi
+          securityContext:
+            privileged: false
+          volumeMounts:
+            - mountPath: /etc/scanner
+              name: scanner
+            - mountPath: /var/images
+              name: var-images
+        - args:
+            - /etc/image-getter/opssight.json
+          command:
+            - ./opssight-image-getter
+          envFrom:
+            - secretRef:
+                name: opssight-sample-opssight-blackduck
+          image: docker.io/blackducksoftware/opssight-image-getter:2.2.4
+          name: image-getter
+          ports:
+            - containerPort: 3004
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 300m
+              memory: 1300Mi
+          securityContext:
+            privileged: false
+          volumeMounts:
+            - mountPath: /etc/image-getter
+              name: image-getter
+            - mountPath: /var/images
+              name: var-images
+      dnsPolicy: ClusterFirst
+      serviceAccountName: opssight-sample-opssight-scanner
+      volumes:
+        - configMap:
+            defaultMode: 420
+            name: opssight-sample-opssight-opssight
+          name: scanner
+        - emptyDir: {}
+          name: var-images
+        - configMap:
+            defaultMode: 420
+            name: opssight-sample-opssight-opssight
+          name: image-getter
+status:
+  replicas: 0
+
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  creationTimestamp: null
+  labels:
+    app: opssight
+    component: pod-processor
+    name: opssight-sample
+  name: opssight-sample-opssight-pod-processor
+  namespace: opssight-sample
+spec:
+  replicas: 1
+  selector:
+    app: opssight
+    component: pod-processor
+    name: opssight-sample
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: opssight
+        component: pod-processor
+        name: opssight-sample
+      name: opssight-sample-opssight-pod-processor
+    spec:
+      containers:
+        - args:
+            - /etc/pod-processor/opssight.json
+          command:
+            - ./opssight-pod-processor
+          image: docker.io/blackducksoftware/opssight-pod-processor:2.2.4
+          name: pod-processor
+          ports:
+            - containerPort: 3002
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 300m
+              memory: 1300Mi
+          volumeMounts:
+            - mountPath: /etc/pod-processor
+              name: pod-processor
+            - mountPath: /tmp
+              name: logs
+      dnsPolicy: ClusterFirst
+      serviceAccountName: opssight-sample-opssight-processor
+      volumes:
+        - configMap:
+            defaultMode: 420
+            name: opssight-sample-opssight-opssight
+          name: pod-processor
+        - emptyDir: {}
+          name: logs
+status:
+  replicas: 0
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: opssight
+    component: core
+    name: opssight-sample
+  name: opssight-sample-opssight-core
+  namespace: opssight-sample
+spec:
+  ports:
+    - name: port-core
+      port: 3001
+      protocol: TCP
+      targetPort: 3001
+  selector:
+    app: opssight
+    component: core
+    name: opssight-sample
+  type: ClusterIP
+status:
+  loadBalancer: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: opssight
+    component: scanner
+    name: opssight-sample
+  name: opssight-sample-opssight-scanner
+  namespace: opssight-sample
+spec:
+  ports:
+    - name: port-scanner
+      port: 3003
+      protocol: TCP
+      targetPort: 3003
+  selector:
+    app: opssight
+    component: scanner
+    name: opssight-sample
+  type: ClusterIP
+status:
+  loadBalancer: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: opssight
+    component: scanner
+    name: opssight-sample
+  name: opssight-sample-opssight-image-getter
+  namespace: opssight-sample
+spec:
+  ports:
+    - name: port-image-getter
+      port: 3004
+      protocol: TCP
+      targetPort: 3004
+  selector:
+    app: opssight
+    component: scanner
+    name: opssight-sample
+  type: ClusterIP
+status:
+  loadBalancer: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: opssight
+    component: pod-processor
+    name: opssight-sample
+  name: opssight-sample-opssight-pod-processor
+  namespace: opssight-sample
+spec:
+  ports:
+    - name: port-pod-processor
+      port: 3002
+      protocol: TCP
+      targetPort: 3002
+  selector:
+    app: opssight
+    component: pod-processor
+    name: opssight-sample
+  type: ClusterIP
+status:
+  loadBalancer: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    prometheus.io/scrape: "true"
+  creationTimestamp: null
+  labels:
+    app: opssight
+    component: prometheus
+    name: opssight-sample
+  name: opssight-sample-opssight-prometheus
+  namespace: opssight-sample
+spec:
+  ports:
+    - name: port-prometheus
+      port: 9090
+      protocol: TCP
+      targetPort: 9090
+  selector:
+    app: opssight
+    component: prometheus
+    name: opssight-sample
+  type: ClusterIP
+status:
+  loadBalancer: {}
+
+---
+apiVersion: v1
+data:
+  opssight.json: |-
+    {
+      "Perceiver": {
+        "AnnotationIntervalSeconds": 30,
+        "DumpIntervalMinutes": 30,
+        "Port": 3002,
+        "Pod": {
+          "NamespaceFilter": ""
+        },
+        "Image": {}
+      },
+      "BlackDuck": {
+        "ConnectionsEnvironmentVariableName": "blackduck.json",
+        "TLSVerification": false
+      },
+      "Perceptor": {
+        "Timings": {
+          "CheckForStalledScansPauseHours": 999999,
+          "StalledScanClientTimeoutHours": 999999,
+          "ModelMetricsPauseSeconds": 15,
+          "UnknownImagePauseMilliseconds": 15000,
+          "ClientTimeoutMilliseconds": 100000
+        },
+        "UseMockMode": false,
+        "Host": "opssight-sample-opssight-core",
+        "Port": 3001
+      },
+      "Scanner": {
+        "Port": 3003,
+        "ImageDirectory": "",
+        "BlackDuckClientTimeoutSeconds": 600
+      },
+      "ImageFacade": {
+        "Host": "localhost",
+        "Port": 3004,
+        "ImagePullerType": "skopeo",
+        "CreateImagesOnly": false
+      },
+      "Skyfire": {
+        "UseInClusterConfig": true,
+        "Port": 3005,
+        "PrometheusPort": 3006,
+        "BlackDuckClientTimeoutSeconds": 120,
+        "KubeDumpIntervalSeconds": 60,
+        "PerceptorDumpIntervalSeconds": 60,
+        "BlackDuckDumpPauseSeconds": 240
+      },
+      "LogLevel": "debug"
+    }
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  labels:
+    app: opssight
+    component: opssight-sample-opssight-opssight
+    name: opssight-sample
+  name: opssight-sample-opssight-opssight
+  namespace: opssight-sample
+
+---
+apiVersion: v1
+data:
+  prometheus.yml: '{"global":{"scrape_interval":"5s"},"scrape_configs":[{"job_name":"perceptor-scrape","scrape_interval":"5s","static_configs":[{"targets":["opssight-sample-opssight-core:3001","opssight-sample-opssight-scanner:3003","opssight-sample-opssight-image-getter:3004","opssight-sample-opssight-pod-processor:3002"]}]}]}'
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  labels:
+    app: opssight
+    component: prometheus
+    name: opssight-sample
+  name: opssight-sample-opssight-prometheus
+  namespace: opssight-sample
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  creationTimestamp: null
+  labels:
+    app: opssight
+    component: scanner
+    name: opssight-sample
+  name: opssight-sample-opssight-scanner
+  namespace: opssight-sample
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  creationTimestamp: null
+  labels:
+    app: opssight
+    component: processor
+    name: opssight-sample
+  name: opssight-sample-opssight-processor
+  namespace: opssight-sample
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  creationTimestamp: null
+  labels:
+    app: opssight
+    component: scanner
+    name: opssight-sample
+  name: opssight-sample-opssight-scanner
+roleRef:
+  apiGroup: ""
+  kind: ClusterRole
+  name: synopsys-operator-admin
+subjects:
+  - kind: ServiceAccount
+    name: opssight-sample-opssight-scanner
+    namespace: opssight-sample
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  creationTimestamp: null
+  labels:
+    app: opssight
+    component: pod-processor
+    name: opssight-sample
+  name: opssight-sample-opssight-pod-processor
+roleRef:
+  apiGroup: ""
+  kind: ClusterRole
+  name: opssight-sample-opssight-pod-processor
+subjects:
+  - kind: ServiceAccount
+    name: opssight-sample-opssight-processor
+    namespace: opssight-sample
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  labels:
+    app: opssight
+    component: pod-processor
+    name: opssight-sample
+  name: opssight-sample-opssight-pod-processor
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - get
+      - watch
+      - list
+      - update
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: opssight
+    component: prometheus
+    name: opssight-sample
+  name: opssight-sample-opssight-prometheus
+  namespace: opssight-sample
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: opssight
+      component: prometheus
+      name: opssight-sample
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: opssight
+        component: prometheus
+        name: opssight-sample
+      name: opssight-sample-opssight-prometheus
+    spec:
+      containers:
+        - args:
+            - --log.level=debug
+            - --config.file=/etc/prometheus/prometheus.yml
+            - --storage.tsdb.path=/tmp/data/
+            - --storage.tsdb.retention=120d
+          image: docker.io/prom/prometheus:v2.1.0
+          name: prometheus
+          ports:
+            - containerPort: 9090
+              name: web
+              protocol: TCP
+          resources: {}
+          volumeMounts:
+            - mountPath: /data
+              name: data
+            - mountPath: /etc/prometheus
+              name: prometheus
+      dnsPolicy: ClusterFirst
+      volumes:
+        - configMap:
+            defaultMode: 420
+            name: opssight-sample-opssight-prometheus
+          name: prometheus
+        - emptyDir: {}
+          name: data
+status: {}
+
+---
+apiVersion: v1
+data:
+  blackduck.json: e30=
+  securedRegistries.json: e30=
+kind: Secret
+metadata:
+  creationTimestamp: null
+  labels:
+    app: opssight
+    component: blackduck
+    name: opssight-sample
+  name: opssight-sample-opssight-blackduck
+  namespace: opssight-sample
+type: Opaque
